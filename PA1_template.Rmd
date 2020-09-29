@@ -11,9 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r proyect}
 library(data.table)
@@ -24,45 +21,65 @@ library(lubridate)
 WordD<-setwd("D:/workspace/R/RepData_PeerAssessment1")
 fileToOpen<-"activity.csv"
 DataToWork <- read.table(fileToOpen, header = TRUE, sep=",")
+```
 
-#step1
+Calculate the total number of steps taken per day
+```{r q1}
 s_stp<-aggregate(steps~date,DataToWork,sum)
+```
 
-#step2
+Make a histogram of the total number of steps taken each day
+```{r q2}
 hist(s_stp$steps)
+```
 
-#step3
+Calculate and report the mean and median of the total number of steps taken per day
+```{r q3}
 mean1<-mean(s_stp$steps,na.rm=TRUE)
 median1<-median(s_stp$steps,na.rm=TRUE)
+mean1
+median1
+```
 
-#step1
+Make a time series plot (i.e. \color{red}{\verb|type = "l"|}type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{r q4}
 m_stp_interval<-aggregate(steps~interval,DataToWork,mean)
 ggplot(m_stp_interval)+geom_line(aes(interval,steps))
+```
 
-#step2
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+```{r q5}
 s_int<-aggregate(steps~interval,DataToWork,sum)
 s_int[which.max(s_int$steps),1]
+```
 
-#step1
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with \color{red}{\verb|NA|}NAs)
+```{r q6}
 table(is.na(DataToWork$steps))
+```
 
-#step3
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+```{r q7}
 DataToWork2<-DataToWork
 DataToWork2[is.na(DataToWork2)]<-m_stp_interval[,2]
+```
 
-#step4
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+```{r q8}
 s_stp2<-aggregate(steps~date,DataToWork2,sum)
 hist(s_stp2$steps)
 
 mean2<-mean(s_stp2$steps)
 median2<-median(s_stp2$steps)
-
 mean2-mean1
 median2-median1
 
 dif_steps<-sum(s_stp$steps)-sum(s_stp2$steps)
+```
 
-#step5
+Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
+```{r q9}
 s_stp3<-mutate(s_stp2,day=weekdays(as.Date(s_stp2$date)))
 
 f_days<-function(x){
@@ -75,10 +92,11 @@ DataToWork3<-mutate(DataToWork2,day=weekdays(as.Date(DataToWork2$date)))
 DataToWork3<-mutate(DataToWork3,day2=f_days(DataToWork3$day))
 DataToWork3[DataToWork3$day2==TRUE,5]<-"WEEKDAY"
 DataToWork3[DataToWork3$day2==FALSE,5]<-"WEEKEND"
-
+```
+Make a panel plot containing a time series plot (i.e. \color{red}{\verb|type = "l"|}type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
+```{r q10}
 DataToWork4<-aggregate(steps~interval+day2,DataToWork3,mean)
 ggplot(DataToWork4)+geom_line(aes(interval,steps))+facet_grid(day2~.,)
-
 
 ```
 
